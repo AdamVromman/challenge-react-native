@@ -77,9 +77,6 @@ export default function GyroscopeTab() {
 
 const styles = StyleSheet.create({
   background: {
-    borderColor: "black",
-    borderWidth: 1,
-    borderStyle: "solid",
     width: "100%",
     height: "100%",
     display: "flex",

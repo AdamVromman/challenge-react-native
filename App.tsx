@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { FAB, PaperProvider, Portal } from "react-native-paper";
 
 import GyroscopeTab from "./components/GyroscopeTab";
+import LightSensorTab from "./components/LightSensorTab";
 
 export default function App() {
   const [selectedFunction, setSelectedFunction] = useState("paused");
@@ -14,6 +15,8 @@ export default function App() {
     switch (selectedFunction) {
       case "gyroscope":
         return <GyroscopeTab />;
+      case "lightSensor":
+        return <LightSensorTab />;
       default:
         return (
           <View>
@@ -31,13 +34,21 @@ export default function App() {
         <FAB.Group
           open={FABOpen}
           visible
-          icon={FABOpen ? "calendar-today" : "plus"}
+          icon={FABOpen ? "close" : "gamepad-square-outline"}
           actions={[
             {
               icon: "scale-balance",
               label: "Gyroscope",
               onPress: () => {
                 setSelectedFunction("gyroscope");
+                setFABOpen(false);
+              },
+            },
+            {
+              icon: "spotlight-beam",
+              label: "Light sensor",
+              onPress: () => {
+                setSelectedFunction("lightSensor");
                 setFABOpen(false);
               },
             },

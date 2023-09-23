@@ -1,7 +1,7 @@
-import { LightSensor } from "expo-sensors";
-import { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
-import { Text } from "react-native-paper";
+import { LightSensor } from 'expo-sensors';
+import { useEffect, useState } from 'react';
+import { StyleSheet, View } from 'react-native';
+import { Text } from 'react-native-paper';
 
 export default function lightSensorTab() {
   const [{ illuminance }, setData] = useState({ illuminance: 0 });
@@ -30,19 +30,19 @@ export default function lightSensorTab() {
 
   const renderText = () => {
     if (calculateDiviation() > 0.6) {
-      return "lighter";
+      return 'lighter';
     }
     if (calculateDiviation() < 0.4) {
-      return "darker";
+      return 'darker';
     }
-    return "hold it";
+    return 'hold it';
   };
 
   const calculateTextColor = () => {
     if (calculateDiviation() < 0.3) {
-      return "white";
+      return 'white';
     }
-    return "black";
+    return 'black';
   };
 
   const _subscribe = () => {
@@ -75,11 +75,11 @@ export default function lightSensorTab() {
 
 const styles = StyleSheet.create({
   background: {
-    width: "100%",
-    height: "100%",
+    width: '100%',
+    height: '100%',
     marginTop: 200,
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

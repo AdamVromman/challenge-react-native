@@ -2,6 +2,7 @@ import { LightSensor } from 'expo-sensors';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Chip, Text } from 'react-native-paper';
+import * as Progress from 'react-native-progress';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import storage from '../../storage/Storage';
@@ -184,6 +185,7 @@ export default function lightSensorTab() {
             >
               {time.toFixed(1)}
             </Text>
+            <Progress.Bar progress={0.3} width={200} />
           </View>
         )}
       </View>

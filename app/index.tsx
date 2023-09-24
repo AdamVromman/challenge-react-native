@@ -1,7 +1,15 @@
+import { router } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
 import { Alert, Share, StyleSheet, View } from 'react-native';
-import { Button, PaperProvider, Text } from 'react-native-paper';
+import {
+  Button,
+  Card,
+  Divider,
+  IconButton,
+  PaperProvider,
+  Text,
+} from 'react-native-paper';
 
 import storage from '../storage/Storage';
 
@@ -66,56 +74,106 @@ export default function App() {
   return (
     <PaperProvider>
       <View style={styles.container}>
-        <Text>High Scores</Text>
-        <View style={styles.highscore}>
-          <Text>Keep your balance: {gyroScore ? gyroScore : '--'}</Text>
-          {gyroScore && (
-            <View>
+        <Text variant="displayMedium">Welcome!</Text>
+        <Text>
+          Before you, you see two games. These games make use of your device
+          sensors to challenge you. Once you get a high score you're proud of,
+          share it with your friends and challenge them!
+        </Text>
+        <View style={styles.cardHolder}>
+          <Card style={styles.card}>
+            <Card.Title
+              titleVariant="headlineMedium"
+              title="Keep your balance"
+              subtitle={`Highscore: ${gyroScore ?? '--'}`}
+              right={() => <IconButton icon="scale-unbalanced"></IconButton>}
+            />
+            <Divider></Divider>
+            <Card.Content style={styles.cardContent}>
+              <Text>
+                In this game you will be challenged to keep your phone as still
+                as possible. The longer you manage, the higher your score.
+              </Text>
+            </Card.Content>
+            <Card.Actions>
               <Button
                 mode="contained"
-                icon="share-variant"
-                onPress={() => onShare('gyro')}
+                icon="play"
+                onPress={() => router.push('/games/gyroscope')}
               >
-                Share
+                Play
               </Button>
+              {gyroScore && (
+                <View style={styles.buttonGroup}>
+                  <Button
+                    mode="contained"
+                    icon="share-variant"
+                    onPress={() => onShare('gyro')}
+                  >
+                    Share
+                  </Button>
+                  <Button
+                    mode="text"
+                    icon="trash-can"
+                    onPress={() => {
+                      storage
+                        .remove({ key: 'gyroScore' })
+                        .then(() => setGyroScore(null));
+                    }}
+                  >
+                    Reset
+                  </Button>
+                </View>
+              )}
+            </Card.Actions>
+          </Card>
+          <Card style={styles.card}>
+            <Card.Title
+              titleVariant="headlineMedium"
+              title="Follow the light"
+              subtitle={`Highscore: ${lightScore ?? '--'}`}
+              right={() => <IconButton icon="spotlight-beam"></IconButton>}
+            />
+            <Divider></Divider>
+            <Card.Content style={styles.cardContent}>
+              <Text>
+                In this game it is key to find the perfect balance between light
+                and dark. Keep your device in the right amount of light for long
+                enough!
+              </Text>
+            </Card.Content>
+            <Card.Actions>
               <Button
                 mode="contained"
-                icon="trash-can"
-                onPress={() => {
-                  storage
-                    .remove({ key: 'gyroScore' })
-                    .then(() => setGyroScore(null));
-                }}
+                icon="play"
+                onPress={() => router.push('/games/light-sensor')}
               >
-                Reset
+                Play
               </Button>
-            </View>
-          )}
-        </View>
-        <View style={styles.highscore}>
-          <Text>Follow the light: {lightScore ? lightScore : '--'}</Text>
-          {lightScore && (
-            <View>
-              <Button
-                mode="contained"
-                icon="share-variant"
-                onPress={() => onShare('light')}
-              >
-                Share
-              </Button>
-              <Button
-                mode="contained"
-                icon="trash-can"
-                onPress={() => {
-                  storage
-                    .remove({ key: 'lightScore' })
-                    .then(() => setLightScore(null));
-                }}
-              >
-                Reset
-              </Button>
-            </View>
-          )}
+              {lightScore && (
+                <View style={styles.buttonGroup}>
+                  <Button
+                    mode="contained"
+                    icon="share-variant"
+                    onPress={() => onShare('light')}
+                  >
+                    Share
+                  </Button>
+                  <Button
+                    mode="text"
+                    icon="trash-can"
+                    onPress={() => {
+                      storage
+                        .remove({ key: 'lightScore' })
+                        .then(() => setLightScore(null));
+                    }}
+                  >
+                    Reset
+                  </Button>
+                </View>
+              )}
+            </Card.Actions>
+          </Card>
         </View>
       </View>
       <StatusBar style="auto" />
@@ -136,12 +194,25 @@ const styles = StyleSheet.create({
     right: 0,
     bottom: 0,
   },
-  highscore: {
+  cardHolder: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    width: '90%',
+    justifyContent: 'space-between',
+    gap: 20,
+    marginTop: 20,
+  },
+  card: {
+    width: '100%',
+  },
+  cardContent: {
+    paddingTop: 20,
+    paddingBottom: 20,
+  },
+  buttonGroup: {
     display: 'flex',
     flexDirection: 'row',
     alignItems: 'center',
-    width: '80%',
-    justifyContent: 'space-between',
-    gap: 20,
   },
 });

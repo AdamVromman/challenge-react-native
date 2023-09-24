@@ -75,7 +75,7 @@ function RootLayoutNav() {
               },
 
               {
-                icon: 'scale-balance',
+                icon: 'scale-unbalanced',
                 label: 'Gyroscope',
                 size: 'medium',
                 onPress: () => {

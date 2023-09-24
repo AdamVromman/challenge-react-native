@@ -1,5 +1,5 @@
 import { LightSensor } from 'expo-sensors';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import { Button, Chip, Text } from 'react-native-paper';
 import * as Progress from 'react-native-progress';
@@ -24,9 +24,11 @@ export default function lightSensorTab() {
   const [highestScore, setHighestScore] = useState(0);
 
   const [time, setTime] = useState(20);
-  const [timer, setTimer] = useState(null);
 
-  const [toWin, setToWin] = useState(null);
+  const interval = useRef<NodeJS.Timeout | null>();
+
+  const [timeToWin, setTimeToWin] = useState(3);
+  const [winning, setWinning] = useState('');
 
   const subscribe = () => {
     setSubscription(LightSensor.addListener(setData));
@@ -54,9 +56,9 @@ export default function lightSensorTab() {
 
   const calculateTextColor = () => {
     if (diviation < 0.3) {
-      return 'white';
+      return 'rgb(255,255,255)';
     }
-    return 'black';
+    return 'rgb(0,0,0)';
   };
 
   const persistScore = (score) => {
@@ -66,57 +68,55 @@ export default function lightSensorTab() {
     });
   };
 
-  const updateScore = () => {
-    if (playing) {
-      setTime((time) => {
-        if (time <= 0) {
-          stopGame(0, true);
-        }
-        return Math.round(time * 10 - 1) / 10;
-      });
-    }
-  };
-
   const startGame = () => {
     subscribe();
     setPlaying(true);
   };
 
-  const stopGame = (score: number, lost: boolean) => {
-    clearInterval(timer);
-    setTimer(null);
-    if (score > highestScore) {
-      setHighestScore(score);
-      persistScore(score);
+  const stopGame = () => {
+    if (time > highestScore && time !== 20) {
+      setHighestScore(time);
+      persistScore(time);
     }
+    clearInterval(interval.current);
+    setLost(time <= 0);
     setTime(20);
-    setLost(lost);
+    setTimeToWin(3);
+
     setPlaying(false);
     unsubscribe();
   };
 
-  const isWinning = (score: number) => {
-    if (diviation > 0.6) {
-      clearTimeout(toWin);
-      return 'lighter';
-    }
-    if (diviation < 0.4) {
-      clearTimeout(toWin);
-      return 'darker';
+  useEffect(() => {
+    const updateScore = () => {
+      if (playing) {
+        interval.current = setInterval(
+          () => setTime((t) => Math.round(t * 10 - 1) / 10),
+          100
+        );
+      }
+    };
+    if (time <= 0 && interval.current) {
+      stopGame();
     }
 
-    if (!toWin) {
-      setToWin(setTimeout(() => stopGame(score - 3, false), 3000));
+    if (time === 20) {
+      updateScore();
     }
-
-    return 'hold it';
-  };
+  }, [playing, time]);
 
   useEffect(() => {
-    if (playing) {
-      setTimer(setInterval(updateScore, 100));
+    if (diviation > 0.6) {
+      setWinning('lighter');
+      setTimeToWin(3);
+    } else if (diviation < 0.4) {
+      setWinning('darker');
+      setTimeToWin(3);
+    } else {
+      setWinning('hold it');
+      setTimeToWin((t) => t - 0.1);
     }
-  }, [playing]);
+  }, [time]);
 
   useEffect(() => {
     if (storage) {
@@ -132,6 +132,12 @@ export default function lightSensorTab() {
         .catch(() => setHighestScore(0));
     }
   });
+
+  useEffect(() => {
+    if (timeToWin <= 0) {
+      stopGame();
+    }
+  }, [timeToWin]);
 
   return (
     <SafeAreaView>
@@ -167,7 +173,7 @@ export default function lightSensorTab() {
         ) : (
           <View
             style={{
-              ...styles.background,
+              ...styles.game,
               backgroundColor: `rgb(${33 + 222 * diviation}, ${
                 31 + 219 * diviation
               }, ${27 + 186 * diviation})`,
@@ -177,7 +183,7 @@ export default function lightSensorTab() {
               variant="displaySmall"
               style={{ color: calculateTextColor() }}
             >
-              {isWinning(time)}
+              {winning}
             </Text>
             <Text
               style={{ color: calculateTextColor() }}
@@ -185,7 +191,11 @@ export default function lightSensorTab() {
             >
               {time.toFixed(1)}
             </Text>
-            <Progress.Bar progress={0.3} width={200} />
+            <Progress.Bar
+              color={calculateTextColor()}
+              progress={timeToWin / 3}
+              width={200}
+            />
           </View>
         )}
       </View>
@@ -206,6 +216,14 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     marginTop: 50,
+    gap: 20,
+  },
+  game: {
+    width: '100%',
+    height: '100%',
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
     gap: 20,
   },
 });

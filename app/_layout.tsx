@@ -73,17 +73,7 @@ function RootLayoutNav() {
                   router.push('/');
                 },
               },
-              {
-                icon: 'share-variant',
-                label: 'Share',
-                color: 'white',
-                size: 'medium',
-                style: { backgroundColor: 'purple' },
-                onPress: () => {
-                  setFABOpen(false);
-                  router.push('/');
-                },
-              },
+
               {
                 icon: 'scale-balance',
                 label: 'Gyroscope',

@@ -119,7 +119,8 @@ export default function lightSensorTab() {
         })
         .then((data) => {
           setHighestScore(data);
-        });
+        })
+        .catch(() => setHighestScore(0));
     }
   });
 
@@ -129,15 +130,16 @@ export default function lightSensorTab() {
         <View style={styles.background}>
           <Text>{highestScore}</Text>
           <Text variant="displaySmall">
-            {lost ? 'You lost' : 'Keep your balance!'}
+            {lost ? 'You lost' : 'Follow the light'}
           </Text>
           <Text variant="labelMedium">
-            In this game, you have to keep your phone as still as possible.
+            In this game, you have to find a spot with the perfect amount of
+            light
           </Text>
           <Text>
-            If the light is green, that means your points are being counted. If
-            the light turns to red, your points pause. If the lights gets TOO
-            red, you lose.
+            The game will tell you whether you need more light, less light or
+            keep it like that. Keep it in the perfect light for long enough and
+            you win the game
           </Text>
           <Button
             mode="contained"
@@ -145,7 +147,7 @@ export default function lightSensorTab() {
             disabled={!sensorAvailable}
             onPress={startGame}
           >
-            {sensorAvailable ? 'Start' : 'No Gyroscope available'}
+            {sensorAvailable ? 'Start' : 'No Light sensor available'}
           </Button>
         </View>
       ) : (

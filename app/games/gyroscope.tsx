@@ -76,7 +76,8 @@ export default function GyroscopeTab() {
         })
         .then((data) => {
           setHighestScore(data);
-        });
+        })
+        .catch(() => setHighestScore(0));
     }
   });
 

@@ -85,7 +85,7 @@ export default function App() {
             <Card.Title
               titleVariant="headlineMedium"
               title="Keep your balance"
-              subtitle={`Highscore: ${gyroScore ?? '--'}`}
+              subtitle={`High score: ${gyroScore ?? '--'}`}
               right={() => <IconButton icon="scale-unbalanced"></IconButton>}
             />
             <Divider></Divider>
@@ -131,7 +131,7 @@ export default function App() {
             <Card.Title
               titleVariant="headlineMedium"
               title="Follow the light"
-              subtitle={`Highscore: ${lightScore ?? '--'}`}
+              subtitle={`High score: ${lightScore ?? '--'}`}
               right={() => <IconButton icon="spotlight-beam"></IconButton>}
             />
             <Divider></Divider>

@@ -93,7 +93,7 @@ function RootLayoutNav() {
                 },
               },
             ]}
-            onStateChange={() => console.log('state changed')}
+            onStateChange={() => {}}
             onPress={() => {
               if (FABOpen) {
                 setFABOpen(false);

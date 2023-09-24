@@ -5,15 +5,20 @@ import { Button, Text } from 'react-native-paper';
 
 import storage from '../../storage/Storage';
 
+const getRandomValue = () => {
+  return Math.round(Math.random() * 10);
+};
+
 export default function lightSensorTab() {
   const [subscription, setSubscription] = useState(null);
   const [{ illuminance }, setData] = useState({ illuminance: 0 });
-  const [randomIlluminance] = useState(Math.round(Math.random() * 10));
+  const [randomIlluminance] = useState(getRandomValue());
+  const [diviation, setDiviation] = useState(0);
 
   const [sensorAvailable, setSensorAvailable] = useState(null);
 
   const [playing, setPlaying] = useState(false);
-  const [lost, setLost] = useState(false);
+  const [lost, setLost] = useState(null);
   const [highestScore, setHighestScore] = useState(0);
 
   const [time, setTime] = useState(20);
@@ -38,23 +43,13 @@ export default function lightSensorTab() {
     return Math.round(illuminance / 100);
   };
 
-  const calculateDiviation = () => {
+  useEffect(() => {
     const d = calculateIlluminance() / (randomIlluminance * 2);
-    return 1 - (d > 1 ? 1 : d);
-  };
-
-  const renderText = () => {
-    if (calculateDiviation() > 0.6) {
-      return 'lighter';
-    }
-    if (calculateDiviation() < 0.4) {
-      return 'darker';
-    }
-    return 'hold it';
-  };
+    setDiviation(1 - (d > 1 ? 1 : d));
+  }, [illuminance]);
 
   const calculateTextColor = () => {
-    if (calculateDiviation() < 0.3) {
+    if (diviation < 0.3) {
       return 'white';
     }
     return 'black';
@@ -68,13 +63,14 @@ export default function lightSensorTab() {
   };
 
   const updateScore = () => {
-    isWinning(time);
-    setTime((time) => {
-      if (time <= 0) {
-        stopGame(0);
-      }
-      return Math.round(time * 10 - 1) / 10;
-    });
+    if (playing) {
+      setTime((time) => {
+        if (time <= 0) {
+          stopGame(0, true);
+        }
+        return Math.round(time * 10 - 1) / 10;
+      });
+    }
   };
 
   const startGame = () => {
@@ -82,25 +78,30 @@ export default function lightSensorTab() {
     setPlaying(true);
   };
 
-  const stopGame = (score: number) => {
+  const stopGame = (score: number, lost: boolean) => {
     clearInterval(timer);
     setTimer(null);
     if (score > highestScore) {
       setHighestScore(score);
       persistScore(score);
     }
-    setLost(true);
+    setTime(20);
+    setLost(lost);
     setPlaying(false);
     unsubscribe();
   };
 
   const isWinning = (score: number) => {
-    console.log(calculateDiviation());
-    if (calculateDiviation() < 0.6 && calculateDiviation() > 0.4) {
-      if (!toWin) {
-        setToWin(setTimeout(() => stopGame(score), 3000));
-      }
+    if (diviation > 0.6) {
+      return 'lighter';
     }
+    if (diviation < 0.4) {
+      return 'darker';
+    }
+    if (!toWin) {
+      setToWin(setTimeout(() => stopGame(score - 3, false), 3000));
+    }
+    return 'hold it';
   };
 
   useEffect(() => {
@@ -130,7 +131,7 @@ export default function lightSensorTab() {
         <View style={styles.background}>
           <Text>{highestScore}</Text>
           <Text variant="displaySmall">
-            {lost ? 'You lost' : 'Follow the light'}
+            {lost == null ? 'Follow the light' : lost ? 'You lost' : 'you won!'}
           </Text>
           <Text variant="labelMedium">
             In this game, you have to find a spot with the perfect amount of
@@ -154,15 +155,14 @@ export default function lightSensorTab() {
         <View
           style={{
             ...styles.background,
-            backgroundColor: `rgb(${33 + 222 * calculateDiviation()}, ${
-              31 + 219 * calculateDiviation()
-            }, ${27 + 186 * calculateDiviation()})`,
+            backgroundColor: `rgb(${33 + 222 * diviation}, ${
+              31 + 219 * diviation
+            }, ${27 + 186 * diviation})`,
           }}
         >
-          <Text style={{ color: calculateTextColor() }}>
-            {calculateDiviation()}
+          <Text variant="displaySmall" style={{ color: calculateTextColor() }}>
+            {isWinning(time)}
           </Text>
-          <Text style={{ color: calculateTextColor() }}>{renderText()}</Text>
           <Text style={{ color: calculateTextColor() }} variant="displayLarge">
             {time.toFixed(1)}
           </Text>

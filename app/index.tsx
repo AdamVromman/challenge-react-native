@@ -69,28 +69,52 @@ export default function App() {
         <Text>High Scores</Text>
         <View style={styles.highscore}>
           <Text>Keep your balance: {gyroScore ? gyroScore : '--'}</Text>
-          {lightScore && (
-            <Button
-              mode="contained"
-              icon="share-variant"
-              compact={true}
-              onPress={() => onShare('gyro')}
-            >
-              Share
-            </Button>
+          {gyroScore && (
+            <View>
+              <Button
+                mode="contained"
+                icon="share-variant"
+                onPress={() => onShare('gyro')}
+              >
+                Share
+              </Button>
+              <Button
+                mode="contained"
+                icon="trash-can"
+                onPress={() => {
+                  storage
+                    .remove({ key: 'gyroScore' })
+                    .then(() => setGyroScore(null));
+                }}
+              >
+                Reset
+              </Button>
+            </View>
           )}
         </View>
         <View style={styles.highscore}>
           <Text>Follow the light: {lightScore ? lightScore : '--'}</Text>
           {lightScore && (
-            <Button
-              mode="contained"
-              icon="share-variant"
-              compact={true}
-              onPress={() => onShare('light')}
-            >
-              Share
-            </Button>
+            <View>
+              <Button
+                mode="contained"
+                icon="share-variant"
+                onPress={() => onShare('light')}
+              >
+                Share
+              </Button>
+              <Button
+                mode="contained"
+                icon="trash-can"
+                onPress={() => {
+                  storage
+                    .remove({ key: 'lightScore' })
+                    .then(() => setLightScore(null));
+                }}
+              >
+                Reset
+              </Button>
+            </View>
           )}
         </View>
       </View>

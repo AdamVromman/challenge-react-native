@@ -10,32 +10,12 @@ export default function GyroscopeTab() {
   const [playing, setPlaying] = useState(false);
   const [lost, setLost] = useState(false);
   const [highestScore, setHighestScore] = useState(0);
-
-  useEffect(() => {
-    if (storage) {
-      storage
-        .load({
-          key: 'gyroScore',
-          autoSync: false,
-          syncInBackground: false,
-        })
-        .then((data) => {
-          setHighestScore(data);
-        });
-    }
-  });
-
+  const [score, setScore] = useState(0);
+  const [sensorAvailable, setSensorAvailable] = useState(null);
   const [{ x, y, z }, setData] = useState({
     x: 0,
     y: 0,
     z: 0,
-  });
-
-  const [score, setScore] = useState(0);
-  const [sensorAvailable, setSensorAvailable] = useState(null);
-
-  Gyroscope.isAvailableAsync().then((data) => {
-    setSensorAvailable(data);
   });
 
   const subscribe = () => {
@@ -46,33 +26,17 @@ export default function GyroscopeTab() {
     );
   };
 
-  const calculateCoordPercentage = (value) => {
-    const v = Math.round(Math.abs(value) * 100) / 100;
-    return v > 1 ? 1 : v;
-  };
-
-  const calculateDiviation = () => {
-    return (
-      calculateCoordPercentage(x) +
-      calculateCoordPercentage(y) +
-      calculateCoordPercentage(z)
-    );
-  };
-
   const unsubscribe = () => {
     subscription && subscription.remove();
     setSubscription(null);
   };
 
-  useEffect(() => {
-    if (playing) {
-      if (calculateDiviation() < 1) {
-        setScore(score + 1);
-      } else if (calculateDiviation() > 2) {
-        stopGame();
-      }
-    }
-  }, [x, y, z, playing]);
+  const persistScore = (score: number) => {
+    storage.save({
+      key: 'gyroScore',
+      data: score,
+    });
+  };
 
   const startGame = () => {
     setPlaying(true);
@@ -89,53 +53,85 @@ export default function GyroscopeTab() {
     unsubscribe();
   };
 
-  const persistScore = (score: number) => {
-    storage.save({
-      key: 'gyroScore',
-      data: score,
-    });
+  const calculateCoordPercentage = (value) => {
+    const v = Math.round(Math.abs(value) * 100) / 100;
+    return v > 1 ? 1 : v;
   };
 
+  const calculateDiviation = () => {
+    return (
+      calculateCoordPercentage(x) +
+      calculateCoordPercentage(y) +
+      calculateCoordPercentage(z)
+    );
+  };
+
+  useEffect(() => {
+    if (storage) {
+      storage
+        .load({
+          key: 'gyroScore',
+          autoSync: false,
+          syncInBackground: false,
+        })
+        .then((data) => {
+          setHighestScore(data);
+        });
+    }
+  });
+
+  useEffect(() => {
+    if (playing) {
+      if (calculateDiviation() < 1) {
+        setScore(score + 1);
+      } else if (calculateDiviation() > 2) {
+        stopGame();
+      }
+    }
+  }, [x, y, z, playing]);
+
+  Gyroscope.isAvailableAsync().then((data) => {
+    setSensorAvailable(data);
+  });
+
   return (
-    <>
-      <View>
-        {!playing ? (
-          <View style={styles.background}>
-            <Text>{highestScore}</Text>
-            <Text variant="displaySmall">
-              {lost ? 'You lost' : 'Keep your balance!'}
-            </Text>
-            <Text variant="labelMedium">
-              In this game, you have to keep your phone as still as possible.
-            </Text>
-            <Text>
-              If the light is green, that means your points are being counted.
-              If the light turns to red, your points pause. If the lights gets
-              TOO red, you lose.
-            </Text>
-            <Button
-              mode="contained"
-              dark={true}
-              disabled={!sensorAvailable}
-              onPress={startGame}
-            >
-              {sensorAvailable ? 'Start' : 'No Gyroscope available'}
-            </Button>
-          </View>
-        ) : (
-          <View
-            style={{
-              ...styles.background,
-              backgroundColor: `rgb(${157 + 95 * calculateDiviation()},${
-                252 - 164 * calculateDiviation()
-              }, ${88 + 11 * calculateDiviation()})`,
-            }}
+    <View>
+      {!playing ? (
+        <View style={styles.background}>
+          <Text>{highestScore}</Text>
+          <Text variant="displaySmall">
+            {lost ? 'You lost' : 'Keep your balance!'}
+          </Text>
+          <Text variant="labelMedium">
+            In this game, you have to keep your phone as still as possible.
+          </Text>
+          <Text>
+            If the light is green, that means your points are being counted. If
+            the light turns to red, your points pause. If the lights gets TOO
+            red, you lose.
+          </Text>
+          <Button
+            mode="contained"
+            dark={true}
+            disabled={!sensorAvailable}
+            onPress={startGame}
           >
-            <Text variant="displayLarge">{score}</Text>
-          </View>
-        )}
-      </View>
-    </>
+            {sensorAvailable ? 'Start' : 'No Gyroscope available'}
+          </Button>
+        </View>
+      ) : (
+        <View
+          style={{
+            ...styles.background,
+            backgroundColor: `rgb(${157 + 95 * calculateDiviation()},${
+              252 - 164 * calculateDiviation()
+            }, ${88 + 11 * calculateDiviation()})`,
+          }}
+        >
+          <Text variant="displayLarge">{score}</Text>
+        </View>
+      )}
+    </View>
   );
 }
 
